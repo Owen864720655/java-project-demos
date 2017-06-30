@@ -41,6 +41,7 @@ public class TestStringInterception
 		Scanner scannerByteNumber = new Scanner(System.in);
 		int byteNumber = scannerByteNumber.nextInt();
 
+		System.out.println("字符串的前" + byteNumber + "个字节为:");
 		System.out.println(StringInterception.intercept(line, byteNumber));
 
 		//		line = null;
