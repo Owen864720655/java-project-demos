@@ -7,7 +7,7 @@
  * 
  */
 
-package com.fanglei.stringinterception;
+package com.fanglei.example.stringinterception;
 
 import java.util.Scanner;
 
