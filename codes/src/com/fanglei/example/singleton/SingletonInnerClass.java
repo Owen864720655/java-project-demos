@@ -22,6 +22,11 @@ import java.io.Serializable;
  */
 public class SingletonInnerClass implements Serializable
 {
+	/**
+	 * serialVersionUID:
+	 */
+	private static final long serialVersionUID = 2974514788824049240L;
+
 	// private constructor
 	private SingletonInnerClass(){}
 

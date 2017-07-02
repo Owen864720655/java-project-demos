@@ -50,6 +50,7 @@ public class GoldbackGuess
 	 */
 	public GoldbackGuess(int maxNumber)
 	{
+		// Set the maxNumber >= 4
 		maxNumber = Math.max(maxNumber, 4);
 		this.maxNumber = maxNumber;
 		this.primeNumbers = generatePrimeNumbers(maxNumber);
@@ -122,6 +123,7 @@ public class GoldbackGuess
 	 * isPrime
 	 * 
 	 * Check whether one number is a prime
+	 * 
 	 * @param number the number
 	 * @return the result
 	 */
@@ -180,6 +182,4 @@ public class GoldbackGuess
 	{
 		this.primeNumbers = primeNumbers;
 	}
-
-
 }
