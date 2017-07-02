@@ -20,21 +20,20 @@ package com.fanglei.example.amountofmoneyconversion;
  */
 public class TestAmountOfMoneyConversion
 {
-
-	/** main
-	 * 
-	 * 
-	 * @param args
-	 */
 	public static void main(String[] args)
 	{
 		String money = "￥10121234353340011";
-		AmountOfMoneyConversion.init();
 		String result = AmountOfMoneyConversion.convert(money);
 
 		System.out.println("阿拉伯数字金额为: " + money);
+		if((result == null) || (result.length()==0))
+		{
+			System.out.println("金额转换失败");
+		}
+		else {
 
-		System.out.println("中国大写金额为: " + result);
+			System.out.println("中文大写金额为: " + result);
+		}
 	}
 
 }

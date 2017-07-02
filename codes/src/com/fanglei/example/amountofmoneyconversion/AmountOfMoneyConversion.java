@@ -44,7 +44,12 @@ public class AmountOfMoneyConversion
 	private static final String MILLION = "佰";
 	private static final String TEN_MILLION = "仟";
 	private static final String HUNDRED_MILLION = "亿";
-	private static final String YUAN = "元整";
+	private static final String YUAN = "元";
+	private static final String JIAO = "角";
+	private static final String FEN = "分";
+	private static final String ZHENG = "整";
+
+	private static final char ZERO_CHAR = '0';
 
 	/**
 	 * Digits 0~9
@@ -57,12 +62,30 @@ public class AmountOfMoneyConversion
 	private static Map<Integer, String> units = new HashMap<>();
 
 	/**
+	 * The amount of money: the integer part
+	 */
+	private static String integerAmount = "";
+
+	/**
+	 * The amount of money: the change part
+	 */
+	private static String changeAmount = "";
+
+	/**
+	 * Static constructor
+	 */
+	static {
+		init();
+	}
+
+	/**
 	 * init
 	 * 
 	 * Initialize the digits and units maps
 	 */
 	public static void init()
 	{
+		Map<String, String> digits = new HashMap<>();
 		digits.put("0", ZERO);
 		digits.put("1", ONE);
 		digits.put("2", TWO);
@@ -73,7 +96,9 @@ public class AmountOfMoneyConversion
 		digits.put("7", SEVEN);
 		digits.put("8", EIGHT);
 		digits.put("9", NINE);
+		AmountOfMoneyConversion.digits = digits;
 
+		Map<Integer, String> units = new HashMap<>();
 		units.put(2, TEN);
 		units.put(3, HUNDRED);
 		units.put(4, THOUSAND);
@@ -82,34 +107,7 @@ public class AmountOfMoneyConversion
 		units.put(7, MILLION);
 		units.put(8, TEN_MILLION);
 		units.put(9, HUNDRED_MILLION);
-	}
-
-	/**
-	 * Constructor
-	 * 
-	 */
-	public AmountOfMoneyConversion()
-	{
-		init();
-	}
-
-
-	/**
-	 * parseNumber
-	 * 
-	 * parse the digits from the String
-	 * @param number the number String
-	 * @return the digits
-	 */
-	private static String parseNumber(String number)
-	{
-		Pattern pattern = Pattern.compile("￥(\\d+)");
-		Matcher matcher = pattern.matcher(number);
-		if (matcher.find())
-		{
-			return matcher.group(1);
-		}
-		return null;
+		AmountOfMoneyConversion.units = units;
 	}
 
 	/**
@@ -119,17 +117,80 @@ public class AmountOfMoneyConversion
 	 * @param number the arabic description
 	 * @return Chinese traditional description
 	 */
-	public static String convert(String number)
+	public static String convert(String arabicNumbers)
 	{
-		// Parse the numbers
-		String numberStr = parseNumber(number);
-		if (numberStr == null)
+		// Parse the Arabic numbers
+		if (!parseNumber(arabicNumbers))
 		{
 			return null;
 		}
 
+		StringBuffer stringBuffer = new StringBuffer();
+
+		// Parse the integer part
+		if((integerAmount == null) || (integerAmount.length() == 0))
+		{
+			return null;
+		}
+		else {
+			stringBuffer.append(parseIntegerPart(integerAmount));
+		}
+
+		// Parse the change part
+		if((changeAmount == null) || (changeAmount.length() <= 0))
+		{
+			stringBuffer.append(ZHENG);
+		}
+		else {
+			String change = parseChangePart(changeAmount);
+			if ((change == null) || (change.length() == 0) )
+			{
+				stringBuffer.append(ZHENG);
+			}
+			else {
+				stringBuffer.append(parseChangePart(changeAmount));
+			}
+		}
+
+		return stringBuffer.toString();
+	}
+
+	/**
+	 * parseNumber
+	 * 
+	 * parse the digits from the String
+	 * @param number the number String
+	 * @return the digits
+	 */
+	private static boolean parseNumber(String number)
+	{
+		Pattern pattern = Pattern.compile("￥(\\d+)(\\.*)(\\d{0,2})");
+		Matcher matcher = pattern.matcher(number);
+		if (matcher.find())
+		{
+			integerAmount = matcher.group(1);
+			String dots = matcher.group(2);
+			changeAmount = matcher.group(3);
+			if((dots.length() >= 2) || (integerAmount == null) || (integerAmount.length() == 0))
+			{
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * parseIntegerPart
+	 * 
+	 * Parse the integer part of the amount of money
+	 * @param number
+	 * @return
+	 */
+	private static String parseIntegerPart(String number)
+	{
 		// Split the numbers to groups
-		int numberLen = numberStr.length();
+		int numberLen = number.length();
 		int len = numberLen/8;
 		int tailLen = numberLen % 8;
 		String result = "";
@@ -139,7 +200,7 @@ public class AmountOfMoneyConversion
 		{
 			int endIndex = tailLen + (i * 8);
 			int beginIndex = endIndex - 8;
-			String tempStr = processOneGroup(numberStr.substring(beginIndex, endIndex));
+			String tempStr = processIntegerGroup(number.substring(beginIndex, endIndex));
 			if (i < len)
 			{
 				tempStr += HUNDRED_MILLION;
@@ -150,9 +211,9 @@ public class AmountOfMoneyConversion
 		// Deal with the tail
 		if (len > 0)
 		{
-			result = processOneGroup(numberStr.substring(0, tailLen)) + HUNDRED_MILLION + result;
+			result = processIntegerGroup(number.substring(0, tailLen)) + HUNDRED_MILLION + result;
 		}else {
-			result = processOneGroup(numberStr.substring(0, tailLen)) + result;
+			result = processIntegerGroup(number.substring(0, tailLen)) + result;
 		}
 
 		// Remove the unnecessary Zeros
@@ -175,6 +236,24 @@ public class AmountOfMoneyConversion
 		return stringBuffer.toString();
 	}
 
+	/**
+	 * parseChangePart
+	 * 
+	 * Parse the change part of the amount of money
+	 * @param number
+	 * @return
+	 */
+	public static String parseChangePart(String number)
+	{
+		StringBuffer stringBuffer = new StringBuffer();
+		number = number + ZERO_CHAR + ZERO_CHAR;
+		if ((number.charAt(0) > ZERO_CHAR) || (number.charAt(1) > ZERO_CHAR))
+		{
+			stringBuffer.append(digits.get(number.substring(0, 1))).append(JIAO);
+			stringBuffer.append(digits.get(number.substring(1, 2))).append(FEN);
+		}
+		return stringBuffer.toString();
+	}
 
 	/**
 	 * processOneGroup
@@ -183,7 +262,7 @@ public class AmountOfMoneyConversion
 	 * @param number
 	 * @return
 	 */
-	private static String processOneGroup(String number)
+	private static String processIntegerGroup(String number)
 	{
 		StringBuffer stringBuffer = new StringBuffer();
 		int len = number.length();
