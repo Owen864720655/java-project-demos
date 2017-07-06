@@ -88,18 +88,9 @@ public class Stack<E>
 	 * @param item
 	 * @return
 	 */
-	public int search(Object item)
+	public int search(E e)
 	{
-		for (int i = 0; i < list.size(); i ++)
-		{
-			if (item.equals(list.get(i)))
-			{
-				return i + 1;
-			}
-		}
-		return 0;
+		return list.indexOf(e);
 	}
-
-
 
 }
